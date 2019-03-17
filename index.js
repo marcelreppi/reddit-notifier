@@ -18,16 +18,10 @@ async function checkReddit() {
   }
 }
 
-// For local testing
-// setInterval(checkReddit, 5000)
+// Check reddit every hour
+setInterval(checkReddit, 3600000)
 
-exports.handler = async (event) => {
-  await checkReddit()
-  const response = {
-    statusCode: 200,
-    body: JSON.stringify('Reddit notifier executed'),
-  };
-  return response;
-}
+module.exports = { checkReddit }
+
 
 

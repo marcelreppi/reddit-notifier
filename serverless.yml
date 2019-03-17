@@ -6,8 +6,10 @@ provider:
 
 functions:
   reddit-notifier:
-    handler: index.handler
+    handler: serverless.handler
     name: reddit-notifier
+    events:
+      - schedule: cron(0 * * * ? *)
     environment:
       MAIL_HOST: your_mail_provider_host
       MAIL_PORT: your_mail_provider_port
