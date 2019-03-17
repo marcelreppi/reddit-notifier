@@ -25,14 +25,14 @@ const sendMail = mailerPromise.config({
   port: process.env.MAIL_PORT,
   secure: false,
   auth: {
-    user: process.env.MAIL_USER,
+    user: process.env.MAIL_SENDER,
     pass: process.env.MAIL_PW
   }
 })
 
 module.exports.sendNotification = async function(post, subreddit) {
   const mailOptions = {
-    from: process.env.MAIL_USER,
+    from: process.env.MAIL_SENDER,
     to: process.env.MAIL_RECEIVER,
     subject: 'New interesting post in subreddit ' + subreddit.name,
     text: `${post.link}`
