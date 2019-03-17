@@ -1,5 +1,5 @@
-const RSSParser = require('rss-parser');
-const nodemailer = require('nodemailer')
+const RSSParser = require('rss-parser')
+const mailerPromise = require('nodemailer-promise')
 
 const latestPostIds = {}
 
@@ -20,7 +20,7 @@ module.exports.fetchRSSFeeds = async function(subreddits) {
   return feeds
 }
 
-const transporter = nodemailer.createTransport({
+const sendMail = mailerPromise.config({
   host: process.env.MAIL_HOST,
   port: process.env.MAIL_PORT,
   secure: false,
@@ -28,17 +28,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PW
   }
-});
+})
 
-transporter.verify(function(error, success) {
-  if (error) {
-    console.log(error);
-  } else {
-    console.log('Mail server is ready');
-  }
-});
-
-module.exports.sendNotification = function(post, subreddit) {
+module.exports.sendNotification = async function(post, subreddit) {
   const mailOptions = {
     from: process.env.MAIL_USER,
     to: process.env.MAIL_RECEIVER,
@@ -47,11 +39,8 @@ module.exports.sendNotification = function(post, subreddit) {
   };
   
   // console.log('notify')
-  
-  transporter.sendMail(mailOptions, (err, info) => {
-    if(err)
-      console.log(err)
-    else
-      console.log(info);
-  });
+  const info = await sendMail(mailOptions)
+  console.log(info)
+
+  return info
 }
