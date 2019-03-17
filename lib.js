@@ -38,7 +38,6 @@ module.exports.sendNotification = async function(post, subreddit) {
     text: `${post.link}`
   };
   
-  // console.log('notify')
   const info = await sendMail(mailOptions)
   console.log(info)
 

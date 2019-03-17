@@ -18,10 +18,15 @@ async function checkReddit() {
   }
 }
 
+exports.lambdaHandler = async (event) => {
+  await checkReddit()
+  await sendNotification({ link: 'Service is working' }, { name: 'Test' }) // For testing
+  const response = {
+    statusCode: 200,
+    body: JSON.stringify('Reddit notifier executed'),
+  };
+  return response;
+}
+
 // Check reddit every hour
 setInterval(checkReddit, 3600000)
-
-module.exports = { checkReddit }
-
-
-
