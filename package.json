@@ -1,0 +1,25 @@
+{
+  "name": "reddit-notifier",
+  "version": "1.0.0",
+  "description": "A service that sends email notifications for reddit posts based on keywords for specified subreddits",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcelreppi/reddit-notifier.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marcelreppi/reddit-notifier/issues"
+  },
+  "homepage": "https://github.com/marcelreppi/reddit-notifier#readme",
+  "dependencies": {
+    "dotenv": "^7.0.0",
+    "nodemailer": "^5.1.1",
+    "rss-parser": "^3.7.0"
+  }
+}
