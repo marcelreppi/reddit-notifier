@@ -22,8 +22,8 @@ module.exports.fetchRSSFeeds = async function(subreddits) {
 
 const transporter = nodemailer.createTransport({
   host: process.env.MAIL_HOST,
-    port: process.env.MAIL_PORT,
-    secure: true, // use SSL
+  port: process.env.MAIL_PORT,
+  secure: false,
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PW
@@ -41,7 +41,7 @@ transporter.verify(function(error, success) {
 module.exports.sendNotification = function(post, subreddit) {
   const mailOptions = {
     from: process.env.MAIL_USER,
-    to: process.env.MAIL_USER,
+    to: process.env.MAIL_RECEIVER,
     subject: 'New interesting post in subreddit ' + subreddit.name,
     text: `${post.link}`
   };

@@ -1,0 +1,16 @@
+service: reddit-notifier
+provider:
+  name: aws
+  runtime: nodejs8.10
+  region: eu-west-1
+
+functions:
+  reddit-notifier:
+    handler: index.handler
+    name: reddit-notifier
+    environment:
+      MAIL_HOST: your_mail_provider_host
+      MAIL_PORT: your_mail_provider_port
+      MAIL_USER: your_sending_mail_address
+      MAIL_PW: your_sending_mail_password
+      MAIL_RECEIVER: receiving_mail_address

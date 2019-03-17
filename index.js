@@ -5,7 +5,7 @@ const { fetchRSSFeeds, sendNotification } = require('./lib.js')
 
 const subreddits = require('./subreddits.json').subreddits
 
-async function go() {
+async function checkReddit() {
   const feeds = await fetchRSSFeeds(subreddits.map( sr => sr.name ))
   
   for (const [i, feed] of feeds.entries()) {
@@ -18,4 +18,16 @@ async function go() {
   }
 }
 
-setInterval(go, 60000)
+// For local testing
+// setInterval(checkReddit, 5000)
+
+exports.handler = async (event) => {
+  await checkReddit()
+  const response = {
+    statusCode: 200,
+    body: JSON.stringify('Reddit notifier executed'),
+  };
+  return response;
+}
+
+
