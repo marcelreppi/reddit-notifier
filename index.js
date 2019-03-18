@@ -1,6 +1,3 @@
-const dotenv = require('dotenv')
-dotenv.config()
-
 const { fetchRSSFeeds, sendNotification } = require('./lib.js')
 
 const subreddits = require('./subreddits.json').subreddits
@@ -18,7 +15,7 @@ async function checkReddit() {
   }
 }
 
-exports.lambdaHandler = async (event) => {
+exports.handler = async (event) => {
   await checkReddit()
   await sendNotification({ link: 'Service is working' }, { name: 'Test' }) // For testing
   const response = {
@@ -27,6 +24,3 @@ exports.lambdaHandler = async (event) => {
   };
   return response;
 }
-
-// Check reddit every hour
-setInterval(checkReddit, 3600000)

@@ -18,7 +18,6 @@
   },
   "homepage": "https://github.com/marcelreppi/reddit-notifier#readme",
   "dependencies": {
-    "dotenv": "^7.0.0",
     "nodemailer-promise": "^2.0.0",
     "rss-parser": "^3.7.0"
   }
