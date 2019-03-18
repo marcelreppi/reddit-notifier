@@ -31,7 +31,7 @@ functions:
     environment:
       MAIL_HOST: your_mail_provider_host
       MAIL_PORT: your_mail_provider_port
-      MAIL_USER: your_sending_mail_address
+      MAIL_SENDER: your_sending_mail_address
       MAIL_PW: your_sending_mail_password
       MAIL_RECEIVER: your_receiving_mail_address
 ```
