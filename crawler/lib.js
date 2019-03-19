@@ -48,7 +48,6 @@ const sendMail = mailerPromise.config({
 })
 
 module.exports.sendNotification = async function(subreddit, links) {
-  console.log(links)
   const mailOptions = {
     from: process.env.MAIL_SENDER,
     to: process.env.MAIL_RECEIVER,
