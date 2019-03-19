@@ -9,8 +9,9 @@ const docClient = new AWS.DynamoDB.DocumentClient({
 module.exports.fetchRSSFeed = async function(subreddit) {
   const rssParser = new RSSParser
 
+  const TableName = 'reddit-notifier-latest-posts'
   const params = {
-    TableName: 'reddalert-serverless-latest-posts',
+    TableName,
     Key: {
       subreddit
     }
@@ -25,7 +26,7 @@ module.exports.fetchRSSFeed = async function(subreddit) {
 
   if (feed.items.length > 0) {
     const params = {
-      TableName: 'reddalert-serverless-latest-posts',
+      TableName,
       Item: {
         subreddit,
         latestPostId: feed.items[0].id
