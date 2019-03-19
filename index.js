@@ -6,19 +6,19 @@ async function checkReddit() {
   for (const sr of subreddits) {
     const feed = await fetchRSSFeed(sr.name)
     const keywordsRegex = new RegExp(sr.keywords.join('|'), 'gi')
-    const matchingPosts = []
+    const matchingLinks = []
     for (const post of feed.items) { 
       if (post.title.match(keywordsRegex)) {
-        matchingPosts.push(post.link)
+        matchingLinks.push(post.link)
       }
     }
-    sendNotification(matchingPosts, sr.name)
+    if (matchingLinks.length > 0) sendNotification(sr.name, matchingLinks)
   }
 }
 
 exports.handler = async (event) => {
   await checkReddit()
-  await sendNotification('Serverless reddalert is working', 'Test') // For testing
+  await sendNotification('Test', ['Serverless reddalert is working']) // For testing
   const response = {
     statusCode: 200,
     body: JSON.stringify('Reddalert executed'),
