@@ -18,7 +18,7 @@ async function checkReddit() {
 
 exports.handler = async (event) => {
   await checkReddit()
-  await sendNotification('Test', ['Serverless reddalert is working']) // For testing
+  // await sendNotification('Test', ['Serverless reddit-notifier is working']) // For testing
   const response = {
     statusCode: 200,
     body: JSON.stringify('Reddalert executed'),
