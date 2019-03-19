@@ -1,23 +1,40 @@
 const RSSParser = require('rss-parser')
 const mailerPromise = require('nodemailer-promise')
+const AWS = require('aws-sdk')
 
-const latestPostIds = {}
+const docClient = new AWS.DynamoDB.DocumentClient({
+  region: 'eu-central-1'
+})
 
-module.exports.fetchRSSFeeds = async function(subreddits) {
+module.exports.fetchRSSFeed = async function(subreddit) {
   const rssParser = new RSSParser
-  const feedPromises = subreddits.map( sr => {
-    let query = '?limit=100'
-    if (latestPostIds[sr]) {
-      query += `&before=${latestPostIds[sr]}`
-    }
-    return rssParser.parseURL(`https://www.reddit.com/r/${sr}/new.rss${query}`) 
-  })
 
-  const feeds = await Promise.all(feedPromises)
-  feeds.forEach( (f, i) => {
-    if (f.items.length > 0) latestPostIds[subreddits[i]] = f.items[0].id
-  })
-  return feeds
+  const params = {
+    TableName: 'reddalert-serverless-latest-posts',
+    Key: {
+      subreddit
+    }
+  }
+  const result = await docClient.get(params).promise()
+
+  let query = '?limit=100'
+  if (result.Item) {
+    query += `&before=${result.Item.latestPostId}`
+  }
+  const feed = await rssParser.parseURL(`https://www.reddit.com/r/${subreddit}/new.rss${query}`) 
+
+  if (feed.items.length > 0) {
+    const params = {
+      TableName: 'reddalert-serverless-latest-posts',
+      Item: {
+        subreddit,
+        latestPostId: feed.items[0].id
+      }
+    }
+    await docClient.put(params).promise()
+  }
+
+  return feed
 }
 
 const sendMail = mailerPromise.config({
@@ -30,12 +47,12 @@ const sendMail = mailerPromise.config({
   }
 })
 
-module.exports.sendNotification = async function(post, subreddit) {
+module.exports.sendNotification = async function(links, subreddit) {
   const mailOptions = {
     from: process.env.MAIL_SENDER,
     to: process.env.MAIL_RECEIVER,
-    subject: 'New interesting post in subreddit ' + subreddit.name,
-    text: `${post.link}`
+    subject: 'New interesting post(s) in subreddit ' + subreddit,
+    text: `${links.join('\n\n')}`
   };
   
   const info = await sendMail(mailOptions)
