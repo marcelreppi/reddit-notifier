@@ -39,7 +39,7 @@ exports.fetchJSONFeed = async function(subreddit) {
   return feed
 }
 
-const sendMail = mailerPromise.config({
+const transporter = nodemailer.createTransport({
   host: process.env.MAIL_HOST,
   port: process.env.MAIL_PORT,
   secure: false,
@@ -47,7 +47,15 @@ const sendMail = mailerPromise.config({
     user: process.env.MAIL_SENDER,
     pass: process.env.MAIL_PW
   }
-})
+});
+
+transporter.verify(function(error, success) {
+  if (error) {
+    console.log(error);
+  } else {
+    console.log("Mail server is ready");
+  }
+});
 
 exports.sendNotification = async function(subreddit, posts) {
   const subject = 'New interesting post(s) in subreddit ' + subreddit
@@ -61,5 +69,5 @@ exports.sendNotification = async function(subreddit, posts) {
 
   await bot.telegram.sendMessage(process.env.MY_CHAT_ID, `${subject}:\n\n${content}`)
   
-  return await sendMail(mailOptions)
+  return await transporter.sendMail(mailOptions)
 }
