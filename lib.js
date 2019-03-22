@@ -1,14 +1,14 @@
-const RSSParser = require('rss-parser')
+const axios = require('axios')
 const mailerPromise = require('nodemailer-promise')
 const AWS = require('aws-sdk')
+
+const bot = require("./bot.js")
 
 const docClient = new AWS.DynamoDB.DocumentClient({
   region: 'eu-central-1'
 })
 
-module.exports.fetchRSSFeed = async function(subreddit) {
-  const rssParser = new RSSParser
-
+exports.fetchJSONFeed = async function(subreddit) {
   const TableName = 'reddit-notifier-latest-posts'
   const params = {
     TableName,
@@ -22,14 +22,15 @@ module.exports.fetchRSSFeed = async function(subreddit) {
   if (result.Item) {
     query += `&before=${result.Item.latestPostId}`
   }
-  const feed = await rssParser.parseURL(`https://www.reddit.com/r/${subreddit}/new.rss${query}`) 
+  const response = await axios.get(`https://www.reddit.com/r/${subreddit}/new.json${query}`) 
+  const feed = response.data.data.children
 
-  if (feed.items.length > 0) {
+  if (feed.length > 0) {
     const params = {
       TableName,
       Item: {
         subreddit,
-        latestPostId: feed.items[0].id
+        latestPostId: feed[0].data.name
       }
     }
     await docClient.put(params).promise()
@@ -48,13 +49,17 @@ const sendMail = mailerPromise.config({
   }
 })
 
-module.exports.sendNotification = function(subreddit, links) {
+exports.sendNotification = async function(subreddit, posts) {
+  const subject = 'New interesting post(s) in subreddit ' + subreddit
+  const content = `${posts.map( p => `${p.data.title}\n${p.data.url}` ).join('\n\n')}`
   const mailOptions = {
     from: process.env.MAIL_SENDER,
     to: process.env.MAIL_RECEIVER,
-    subject: 'New interesting post(s) in subreddit ' + subreddit,
-    text: `${links.join('\n\n')}`
+    subject,
+    text: content
   };
+
+  await bot.telegram.sendMessage(process.env.MY_CHAT_ID, `${subject}:\n\n${content}`)
   
-  return sendMail(mailOptions)
+  return await sendMail(mailOptions)
 }

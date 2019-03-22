@@ -19,8 +19,8 @@
   "homepage": "https://github.com/marcelreppi/reddit-notifier#readme",
   "dependencies": {
     "aws-sdk": "^2.423.0",
+    "axios": "^0.18.0",
     "nodemailer-promise": "^2.0.0",
-    "rss-parser": "^3.7.0",
     "telegraf": "^3.27.1"
   }
 }

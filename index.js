@@ -8,6 +8,7 @@ exports.handler = async (event) => {
     // await sendNotification("Test", ["Serverless reddit-notifier is working"]) // For testing
     await bot.telegram.sendMessage(process.env.MY_CHAT_ID, "Serverless reddit-notifier: Successfully executed")
   } catch (error) {
+    console.log(error)
     await bot.telegram.sendMessage(process.env.MY_CHAT_ID, "Serverless reddit-notifier: There was an error!\n\n" + String(error))
     const response = {
       statusCode: 500,
