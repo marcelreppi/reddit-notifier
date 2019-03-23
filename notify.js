@@ -8,29 +8,34 @@ const transporter = nodemailer.createTransport({
   secure: false,
   auth: {
     user: process.env.MAIL_SENDER,
-    pass: process.env.MAIL_PW
-  }
-});
+    pass: process.env.MAIL_PW,
+  },
+})
 
-transporter.verify(function(error, success) {
+transporter.verify(error => {
   if (error) {
-    console.log(error);
+    console.log(error)
   } else {
-    console.log("Mail server is ready");
+    console.log("Mail server is ready")
   }
-});
+})
 
 exports.sendNotification = async function(subreddit, posts) {
   const subject = "New interesting post(s) in subreddit " + subreddit
-  const content = `${posts.map( p => `${p.data.title}\n${p.data.url}` ).join("\n\n")}`
+  const content = `${posts
+    .map(p => `${p.data.title}\n${p.data.url}`)
+    .join("\n\n")}`
   const mailOptions = {
     from: process.env.MAIL_SENDER,
     to: process.env.MAIL_RECEIVER,
     subject,
-    text: content
-  };
+    text: content,
+  }
 
-  await bot.telegram.sendMessage(process.env.MY_CHAT_ID, `${subject}:\n\n${content}`)
-  
+  await bot.telegram.sendMessage(
+    process.env.MY_CHAT_ID,
+    `${subject}:\n\n${content}`
+  )
+
   return await transporter.sendMail(mailOptions)
 }
