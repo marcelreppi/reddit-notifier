@@ -11,6 +11,8 @@ const docClient = new AWS.DynamoDB.DocumentClient({
 async function fetchJSONFeed(subreddit) {
   // Fetch latest posts
   await sendBotMsg(`Fetching /r/${subreddit}`)
+  console.log(`Fetching /r/${subreddit}`)
+
   const response = await axios.get(
     `https://www.reddit.com/r/${subreddit}/new.json?limit=100`
   )
@@ -54,12 +56,13 @@ async function checkReddit() {
   for (const sr of subreddits) {
     const feed = await fetchJSONFeed(sr.name)
     await sendBotMsg(`Found ${feed.length} new posts in /r/${sr.name}:`)
+    console.log(`Found ${feed.length} new posts in /r/${sr.name}:`)
 
     const keywordsRegexString = sr.keywords
       .map(k => {
         if (k.includes("AND")) {
           const words = k.split(" AND ")
-          return `(${words.map(w => `(?=.*${w})`).join("")})`
+          return `(${words.map(w => `(?=.*${w})`).join("")}).*`
         }
         return `(${k})`
       })
@@ -81,6 +84,7 @@ async function checkReddit() {
 
   if (!newPosts) {
     await sendBotMsg(`No matching posts in any of the subreddits`)
+    console.log(`No matching posts in any of the subreddits`)
   }
 }
 
