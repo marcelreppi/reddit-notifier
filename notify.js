@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer")
 
-const bot = require("./bot.js")
+const { sendBotMsg } = require("./bot.js")
 
 const transporter = nodemailer.createTransport({
   host: process.env.MAIL_HOST,
@@ -16,7 +16,7 @@ transporter.verify(error => {
   if (error) {
     console.log(error)
   } else {
-    console.log("Mail server is ready")
+    // console.log("Mail server is ready")
   }
 })
 
@@ -32,10 +32,7 @@ exports.sendNotification = async function(subreddit, posts) {
     text: content,
   }
 
-  await bot.telegram.sendMessage(
-    process.env.MY_CHAT_ID,
-    `${subject}:\n\n${content}`
-  )
+  await sendBotMsg(`${subject}:\n\n${content}`)
 
   return await transporter.sendMail(mailOptions)
 }

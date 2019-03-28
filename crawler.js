@@ -2,13 +2,21 @@ const AWS = require("aws-sdk")
 const axios = require("axios")
 
 const { sendNotification } = require("./notify.js")
-const bot = require("./bot.js")
+const { sendBotMsg } = require("./bot.js")
 
 const docClient = new AWS.DynamoDB.DocumentClient({
   region: "eu-central-1",
 })
 
 async function fetchJSONFeed(subreddit) {
+  // Fetch latest posts
+  await sendBotMsg(`Fetching /r/${subreddit}`)
+  const response = await axios.get(
+    `https://www.reddit.com/r/${subreddit}/new.json?limit=100`
+  )
+
+  const feed = response.data.data.children
+
   const TableName = "reddit-notifier-latest-posts"
   const params = {
     TableName,
@@ -16,23 +24,21 @@ async function fetchJSONFeed(subreddit) {
       subreddit,
     },
   }
-  const result = await docClient.get(params).promise()
+  const { Item: latestPost } = await docClient.get(params).promise()
 
-  let query = "?limit=100"
-  if (result.Item) {
-    query += `&before=${result.Item.latestPostId}`
+  // Find latest post from that subreddit and remove already seen posts
+  const i = feed.findIndex(x => x.data.created <= latestPost.latestPostCreated)
+  if (i !== -1) {
+    feed.splice(i)
   }
-  const response = await axios.get(
-    `https://www.reddit.com/r/${subreddit}/new.json${query}`
-  )
-  const feed = response.data.data.children
 
+  // Update latest seen post
   if (feed.length > 0) {
     const params = {
       TableName,
       Item: {
         subreddit,
-        latestPostId: feed[0].data.name,
+        latestPostCreated: feed[0].data.created,
       },
     }
     await docClient.put(params).promise()
@@ -47,7 +53,18 @@ async function checkReddit() {
   let newPosts = false
   for (const sr of subreddits) {
     const feed = await fetchJSONFeed(sr.name)
-    const keywordsRegex = new RegExp(sr.keywords.join("|"), "gi")
+    await sendBotMsg(`Found ${feed.length} new posts in /r/${sr.name}:`)
+
+    const keywordsRegexString = sr.keywords
+      .map(k => {
+        if (k.includes("AND")) {
+          const words = k.split(" AND ")
+          return `(${words.map(w => `(?=.*${w})`).join("")})`
+        }
+        return `(${k})`
+      })
+      .join("|")
+    const keywordsRegex = new RegExp(keywordsRegexString, "gi")
     const matchingPosts = []
     for (const post of feed) {
       if (post.data.title.match(keywordsRegex)) {
@@ -63,10 +80,7 @@ async function checkReddit() {
   }
 
   if (!newPosts) {
-    await bot.telegram.sendMessage(
-      process.env.MY_CHAT_ID,
-      `No new messages in any of the subreddits`
-    )
+    await sendBotMsg(`No matching posts in any of the subreddits`)
   }
 }
 

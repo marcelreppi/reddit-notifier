@@ -13,4 +13,8 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
 
 bot.launch()
 
-module.exports = bot
+async function sendBotMsg(msg) {
+  await bot.telegram.sendMessage(process.env.MY_CHAT_ID, msg)
+}
+
+module.exports = { bot, sendBotMsg }
